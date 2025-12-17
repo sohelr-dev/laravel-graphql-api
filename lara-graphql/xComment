@@ -17,3 +17,8 @@ php artisan vendor:publish --tag=lighthouse-schema
 4.for check api
 ==========================
 composer require mll-lab/laravel-graphql-playground
+
+//for work start
+5.query write
+====================
+php artisan lighthouse:query Test
