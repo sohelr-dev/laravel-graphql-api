@@ -1,0 +1,19 @@
+1.install laravel
+=========================
+composer create-project laravel/laravel lara-graphql
+
+2.migrate table
+========================
+ php artisan migrate
+
+3. Lighthouse dependancy add or install to need graphql
+=================================
+composer require nuwave/lighthouse
+
+4.for lighthouse register
+===========================================
+php artisan vendor:publish --tag=lighthouse-schema
+
+4.for check api
+==========================
+composer require mll-lab/laravel-graphql-playground
