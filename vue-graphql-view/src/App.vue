@@ -1,47 +1,219 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import axios from 'axios';
+import { ref } from 'vue';
+
+interface UserType {
+  id?: number
+  name: string
+  email: string
+}
+
+const user = ref<UserType>({
+  name: '',
+  email: '',
+})
+
+
+  const usersItems = ref<UserType[]>([]);
+
+
+  const baseUrl ="http://127.0.0.1:8000/graphql";
+  axios.post(baseUrl,{
+    query:`
+    query {
+      users
+      {
+        id
+        name
+        email
+      }
+    }`
+  })
+  .then((res)=>{
+    console.log(res.data);
+    usersItems.value= res.data.data.users;
+  })
+  .catch((e)=>[
+    console.log(e)
+  ])
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div class="dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle">
+    <button
+      class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center"
+      id="bd-theme"
+      type="button"
+      aria-expanded="false"
+      data-bs-toggle="dropdown"
+      aria-label="Toggle theme (auto)"
+    >
+      <svg class="bi my-1 theme-icon-active" aria-hidden="true">
+        <use href="#circle-half"></use>
+      </svg>
+      <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
+    </button>
+    <ul
+      class="dropdown-menu dropdown-menu-end shadow"
+      aria-labelledby="bd-theme-text"
+    >
+      <li>
+        <button
+          type="button"
+          class="dropdown-item d-flex align-items-center"
+          data-bs-theme-value="light"
+          aria-pressed="false"
+        >
+          <svg class="bi me-2 opacity-50" aria-hidden="true">
+            <use href="#sun-fill"></use>
+          </svg>
+          Light
+          <svg class="bi ms-auto d-none" aria-hidden="true">
+            <use href="#check2"></use>
+          </svg>
+        </button>
+      </li>
+      <li>
+        <button
+          type="button"
+          class="dropdown-item d-flex align-items-center"
+          data-bs-theme-value="dark"
+          aria-pressed="false"
+        >
+          <svg class="bi me-2 opacity-50" aria-hidden="true">
+            <use href="#moon-stars-fill"></use>
+          </svg>
+          Dark
+          <svg class="bi ms-auto d-none" aria-hidden="true">
+            <use href="#check2"></use>
+          </svg>
+        </button>
+      </li>
+      <li>
+        <button
+          type="button"
+          class="dropdown-item d-flex align-items-center active"
+          data-bs-theme-value="auto"
+          aria-pressed="true"
+        >
+          <svg class="bi me-2 opacity-50" aria-hidden="true">
+            <use href="#circle-half"></use>
+          </svg>
+          Auto
+          <svg class="bi ms-auto d-none" aria-hidden="true">
+            <use href="#check2"></use>
+          </svg>
+        </button>
+      </li>
+    </ul>
+  </div>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
+  <div class="container-fluid py-3">
+    <header>
+      <div
+        class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom"
+      >
+        <a
+          href="/"
+          class="d-flex align-items-center link-body-emphasis text-decoration-none"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="40"
+            height="32"
+            class="me-2"
+            viewBox="0 0 118 94"
+            role="img"
+          >
+            <title>Bootstrap</title>
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M24.509 0c-6.733 0-11.715 5.893-11.492 12.284.214 6.14-.064 14.092-2.066 20.577C8.943 39.365 5.547 43.485 0 44.014v5.972c5.547.529 8.943 4.649 10.951 11.153 2.002 6.485 2.28 14.437 2.066 20.577C12.794 88.106 17.776 94 24.51 94H93.5c6.733 0 11.714-5.893 11.491-12.284-.214-6.14.064-14.092 2.066-20.577 2.009-6.504 5.396-10.624 10.943-11.153v-5.972c-5.547-.529-8.934-4.649-10.943-11.153-2.002-6.484-2.28-14.437-2.066-20.577C105.214 5.894 100.233 0 93.5 0H24.508zM80 57.863C80 66.663 73.436 72 62.543 72H44a2 2 0 01-2-2V24a2 2 0 012-2h18.437c9.083 0 15.044 4.92 15.044 12.474 0 5.302-4.01 10.049-9.119 10.88v.277C75.317 46.394 80 51.21 80 57.863zM60.521 28.34H49.948v14.934h8.905c6.884 0 10.68-2.772 10.68-7.727 0-4.643-3.264-7.207-9.012-7.207zM49.948 49.2v16.458H60.91c7.167 0 10.964-2.876 10.964-8.281 0-5.406-3.903-8.178-11.425-8.178H49.948z"
+              fill="currentColor"
+            ></path>
+          </svg>
+          <span class="fs-4">Pricing example</span>
+        </a>
+        <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
+          <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="#"
+            >Features</a
+          >
+          <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="#"
+            >Enterprise</a
+          >
+          <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="#"
+            >Support</a
+          >
+          <a class="py-2 link-body-emphasis text-decoration-none" href="#"
+            >Pricing</a
+          >
+        </nav>
+      </div>
+      <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
+        <h1 class="display-4 fw-normal text-body-emphasis">User</h1>
+      </div>
+    </header>
+    <main>
+      <div class="row">
+        <div class="col-6">
+          <h2 class="display-6 text-center mb-4">Get user</h2>
+          <div class="table-responsive">
+            <table class="table table-body table-border text-center">
+              <thead class="table-dark">
+                <tr>
+                  <th >ID</th>
+                  <th >Name</th>
+                  <th >Email</th>
+                  <th >Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="u in usersItems" :key="u.id">
+                  <td>{{ u.id }}</td>
+                  <td>{{ u.name }}</td>
+                  <td>{{ u.email }}</td>
+                  <td>
+                    <router-view class="btn btn-outline-primary me-2">
+                      view
+                    </router-view>
+                    <router-view class="btn btn-outline-warning text-dark">
+                      Edit
+                    </router-view>
+                  </td>
 
-  <main>
-    <TheWelcome />
-  </main>
+                </tr>
+
+              </tbody>
+    
+            </table>
+          </div>
+
+        </div>
+        <div class="col-3">
+          <h2 class="display-6 text-center mb-4">Create user</h2>
+          <div class="card">
+            <div class="card-body">
+              <form @submit="handleSubmit">
+                <div class="mt-2">
+                  <label for="" class="form-label">Name</label>
+                  <input type="text" v-model="user.name"  class="form-control" >
+                </div>
+                <div class="mt-2 mb-4">
+                  <label for="" class="form-label">Email</label>
+                  <input type="text" v-model="user.email"  class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary text-end">Submit</button>
+
+              </form>
+            </div>
+           
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style>
+<style scoped></style>
