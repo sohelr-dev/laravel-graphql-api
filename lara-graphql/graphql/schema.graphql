@@ -10,10 +10,11 @@
 #   test: String
 #   user: String
 # } 
-type User {
+type UserType {
   id:Int
   name:String
   email:String!
+  password:String!
 }
 
 # sub selection error asle user under id,email like 
@@ -33,3 +34,15 @@ type Query {
 #   test: String
 #   users: String
 # } 
+
+# ! this call mendetory field
+
+type Mutation{
+  createUser( name:String!, email:String!, password:String!):UserType!
+    @field(resolver:"User@create")
+    UpdateUser(id:Int!,name:String!, email:String!):UserType!
+    @field(resolver:"User@update")
+    deleteUser(id:Int!):UserType!
+    @field(resolver:"User@delete")
+
+}

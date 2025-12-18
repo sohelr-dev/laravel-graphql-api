@@ -22,3 +22,38 @@ composer require mll-lab/laravel-graphql-playground
 5.query write
 ====================
 php artisan lighthouse:query Test
+
+6.using mutator
+=============================
+php artisan lighthouse:mutation User
+
+
+
+//for create
+======================
+mutation {
+  createUser(name: "Sohel Rana", email: "sohe.4273@gmail.com", password: "123") {
+    name
+    id
+    email
+    password
+  }
+}
+
+//for update
+==============
+mutation {
+  UpdateUser(id:8,name: "admin", email: "superadmin@gmail.com") {
+    name
+    id
+    email
+  }
+}
+
+//for delete
+======================
+mutation {
+  deleteUser(id:8) {
+    id
+  }
+}
