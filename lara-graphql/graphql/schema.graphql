@@ -10,6 +10,12 @@
 #   test: String
 #   user: String
 # } 
+type User {
+  id:Int
+  name:String
+  email:String!
+  password:String!
+}
 type UserType {
   id:Int
   name:String
