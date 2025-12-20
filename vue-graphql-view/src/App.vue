@@ -1,41 +1,135 @@
 <script setup lang="ts">
+import * as bootstrap from 'bootstrap';
+
 import axios from 'axios';
 import { ref } from 'vue';
 
 interface UserType {
-  id?: number
+  id: number
   name: string
   email: string
+  password: string
 }
 
 const user = ref<UserType>({
+  id:0,
   name: '',
   email: '',
+  password: '',
 })
 
-
   const usersItems = ref<UserType[]>([]);
+ 
 
 
   const baseUrl ="http://127.0.0.1:8000/graphql";
   axios.post(baseUrl,{
+      query:`
+      query {
+        users
+        {
+          id
+          name
+          email
+        }
+      }`
+    })
+    .then((res)=>{
+      console.log(res.data);
+      usersItems.value= res.data.data.users;
+    })
+    .catch((e)=>[
+      console.log(e)
+  ])
+
+  function getUserId(user_id: any){
+    // alert(id);
+    axios.post(baseUrl,{
     query:`
-    query {
-      users
+    query ($id: Int!){
+      user(id: $id)
       {
         id
         name
         email
       }
-    }`
+    }`,
+    variables:{
+      id: user_id
+    }
   })
   .then((res)=>{
-    console.log(res.data);
-    usersItems.value= res.data.data.users;
+    // console.log(res.data.data.user);
+    user.value =res.data.data.user;
+    const model=new bootstrap.Modal(document.getElementById('UserModel'));
+    model.show();
   })
   .catch((e)=>[
     console.log(e)
   ])
+
+  };
+
+
+  function createUser(){
+    // console.log(user.value);
+    axios.post(baseUrl,{
+    query:`
+      mutation($name:String!, $email:String! ,$password:String!) {
+        createUser( name:$name, email:$email, password:$password)
+        {
+          id
+          name
+          email
+        }
+      }`,
+      variables:{
+        name:user.value.name,
+        email:user.value.email,
+        password:user.value.password
+      }
+    })
+    .then((res)=>{
+      // console.log(res.data);
+      const model = bootstrap.Modal.getInstance(document.getElementById('userCreateModel'));
+      model.hide();
+      alert("User Create Successfull .");
+      // usersItems.value= res.data.data.users;
+    })
+    .catch((e)=>[
+      console.log(e)
+    ])
+  }
+
+const deleteUser = ref<boolean>(false);
+  function userDelete(user_id:number){
+    deleteUser.value = window.confirm("Are You Sure Delete this User");
+    if(deleteUser.value){
+      axios.post(baseUrl, {
+    query: `
+      mutation ($id: Int!) {
+        deleteUser(id: $id) {
+          id
+        }
+      }
+    `,
+    variables: {
+      id: user_id
+    }
+  })
+      .then((res)=>{
+        // console.log(res.data);
+        console.log(res.data);
+
+      })
+      .catch((e)=>[
+        console.log(e)
+      ])
+
+    }
+
+  }
+
 </script>
 
 <template>
@@ -156,9 +250,10 @@ const user = ref<UserType>({
     </header>
     <main>
       <div class="row">
-        <div class="col-6">
+        <div class="col">
           <h2 class="display-6 text-center mb-4">Get user</h2>
           <div class="table-responsive">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userCreateModel">Create New User</button>
             <table class="table table-body table-border text-center">
               <thead class="table-dark">
                 <tr>
@@ -174,46 +269,96 @@ const user = ref<UserType>({
                   <td>{{ u.name }}</td>
                   <td>{{ u.email }}</td>
                   <td>
-                    <router-view class="btn btn-outline-primary me-2">
+                    <button type="button" class="btn btn-outline-primary me-2" @click="getUserId(u.id)">
                       view
-                    </router-view>
-                    <router-view class="btn btn-outline-warning text-dark">
-                      Edit
-                    </router-view>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger text-dark" @click="userDelete(u.id)">
+                      Delete
+                    </button>
                   </td>
-
                 </tr>
-
               </tbody>
-    
             </table>
           </div>
-
         </div>
-        <div class="col-3">
-          <h2 class="display-6 text-center mb-4">Create user</h2>
-          <div class="card">
-            <div class="card-body">
-              <form @submit="handleSubmit">
-                <div class="mt-2">
-                  <label for="" class="form-label">Name</label>
-                  <input type="text" v-model="user.name"  class="form-control" >
-                </div>
-                <div class="mt-2 mb-4">
-                  <label for="" class="form-label">Email</label>
-                  <input type="text" v-model="user.email"  class="form-control">
-                </div>
-                <button type="submit" class="btn btn-primary text-end">Submit</button>
-
-              </form>
-            </div>
-           
-          </div>
-
-        </div>
+        
       </div>
     </main>
   </div>
+
+      <!-- modal Details -->
+  <div class="modal fade" id="UserModel" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">User Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>User Id : {{user?.id}}</p>
+          <p>User Name : {{user?.name}}</p>
+          <p>User Email : {{user?.email}}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Create model -->
+  <div class="modal fade" id="userCreateModel" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"> Create New User</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col">
+            <h2 class="display-6 text-center mb-4">Create user</h2>
+            <div class="card">
+              <div class="card-body">
+                <form @submit.prevent="createUser">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mt-2">
+                        <label for="" class="form-label">Name</label>
+                        <input type="text" v-model="user.name"  class="form-control" >
+                      </div>
+                      <div class="mt-2 mb-4">
+                        <label for="" class="form-label">Email</label>
+                        <input type="text" v-model="user.email"  class="form-control">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="mt-2">
+                        <label for="" class="form-label">Password</label>
+                        <input type="text" v-model="user.password"  class="form-control" >
+                      </div>
+                      <div class="mt-2 mb-4">
+                        <label for="" class="form-label">Confirm Password</label>
+                        <input type="text" v-model="user.password"  class="form-control">
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <button type="submit" class="btn btn-primary">Create </button>
+                    </div>
+                  </div>
+                </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <style scoped></style>
